@@ -1,35 +1,49 @@
 #!/usr/bin/python3
-#this is going to be the data agregator the analysis is going to be a different program i heard thata the praw lib is not thread safe but i think if its in the main program it will be fine
+################################################################################
+#this is going to be the data agregator the analysis is going to be a different
+#program. I heard that the praw lib is not thread safe but i think if its in the
+# main program it will be fine
+################################################################################
 import praw
 import json
 from time import time
 import multiprocessing as mp
 clId = "string" #this is client id this will be on your reddit
 clSe = "string" #this is the client secret. it'll be on the app page thats under your reddit
-subRed = "string" #the subreddit that you want to poll
+subRed = "string" #the subreddit that you want to poll; lol whats a global variable
 Pass = "string" #password to your own account
-Username = "string" # your username 
-refresh = 5 *1000 #the first number is in seconds the second is to convert from micro seconds to seconds 
+Username = "string" # your username
+refresh = 5 * 1000 #the first number is in seconds the second is to convert from micro seconds to seconds
+
 def request(reddit):
-    return reddit.request("GET","/r/"+subRed+"/hot")
+    return reddit.request("GET","/r/"+subRed+"/hot") 
+
 def request2pdf(string):
     string = json.dumps(string)
-    #Do something with the json lib 
+    #Do something with the json lib
     return string
+
 def writefile(q):
-    #check to see if log.txt is a thing if not make it
     while True:
         tmp = q.get()
         log = open("log.txt","a")
-        log.write(tmp)
-        log.write("\n")
+        while tmp:
+            log.write(tmp)
+            log.write("\n")
+            try:
+                tmp = q.get(1)
+            except Queue.Empty:
+                tmp = None
+            finally:
+                continue
         log.close()
+
 def main(q):
     reddit = praw.Reddit(client_id = clId,
         client_secret              = clSe,
         password                   = Pass,
         user_agent                 = "python3:worldpowersworldnews:v0.0.1 (by /u/iCePU))",
-        username                   = Username)
+        username                   = userName)
     start_time = time()
     frame = 0
     current_time = start_time
@@ -46,6 +60,7 @@ def main(q):
                 frame_start = time()
             frame_start += refresh # its 5 seconds
             #add frame
+
 if __name__ == '__main__':
     #start the file write process
     q = mp.Queue()
